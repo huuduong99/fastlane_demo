@@ -31,9 +31,11 @@ jobs:
           cache: true
 
       - name: Get flutter dependencies
+        working-directory: ${{ github.workspace }}
         run: flutter pub get
 
       - name: Upgrade flutter dependencies
+        working-directory: ${{ github.workspace }}
         run: flutter pub upgrade
 
       - name: Statically analyze the Dart code for any errors.
@@ -52,8 +54,10 @@ jobs:
           echo keyPassword=\${{ secrets.SIGNING_STORE_PASSWORD }} > ${{env.KEY_PROPERTIES_PATH}}
           echo storePassword=\${{ secrets.SIGNING_KEY_PASSWORD }} >> ${{env.KEY_PROPERTIES_PATH}}
           echo keyAlias=\${{ secrets.SIGNING_KEY_ALIAS }} >> ${{env.KEY_PROPERTIES_PATH}}
+          echo storeFile=\${{ github.workspace }}/android/fastlane_demo-keystore.jks >> ${{env.KEY_PROPERTIES_PATH}}
 
       - name: Build aab
+        working-directory: ${{ github.workspace }}
         run: flutter build appbundle
 
       - name: Upload generated apk to the artifacts
@@ -76,6 +80,7 @@ jobs:
       - name: Upload artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
+          working-directory: ${{ github.workspace }}
           appId: ${{secrets.FIREBASE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_CREDENTIALS }}
           groups: fastlane_demo_group
