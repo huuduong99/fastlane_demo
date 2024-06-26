@@ -1,0 +1,94 @@
+name: Test, Build and Release apk
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '12.x'
+          cache: 'gradle'
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.19.6"
+          channel: 'stable'
+          cache: true
+
+      - name: Get flutter dependencies
+        working-directory: ${{ github.workspace }}
+        run: flutter pub get
+
+      - name: Upgrade flutter dependencies
+        working-directory: ${{ github.workspace }}
+        run: flutter pub upgrade
+
+      - name: Statically analyze the Dart code for any errors.
+        run: flutter analyze .
+
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEY_STORE_BASE64 }}" > fastlane_demo-b64.txt
+          base64 -d fastlane_demo-b64.txt > ${{ github.workspace }}/android/fastlane_demo-keystore.jks
+
+      - name: Set up key.properties
+        working-directory: ${{ github.workspace }}
+        env:
+          KEY_PROPERTIES_PATH: "${{ github.workspace }}/android/key.properties"
+        run: |
+          echo keyPassword=\${{ secrets.KEY_PASSWORD }} > ${{env.KEY_PROPERTIES_PATH}}
+          echo storePassword=\${{ secrets.STORE_PASSWORD }} >> ${{env.KEY_PROPERTIES_PATH}}
+          echo keyAlias=\${{ secrets.KEY_ALIAS }} >> ${{env.KEY_PROPERTIES_PATH}}
+          echo storeFile=\${{ github.workspace }}/android/fastlane_demo-keystore.jks >> ${{env.KEY_PROPERTIES_PATH}}
+
+      - name: Build apk
+        working-directory: ${{ github.workspace }}
+        run: flutter build apk
+
+      - name: Upload generated apk to the artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: apk-release
+          path: build/app/outputs/apk/release/app-release.apk
+
+      #      - name: Install npm
+      #        uses: actions/setup-node@v3
+      #        with:
+      #          node-version: 24
+
+      #      - name: Install Firebase tool
+      #        run: npm install -g firebase-tools --force
+      #
+      #      - name: Upload artifact to Firebase App Distribution
+      #        run: firebase appdistribution:distribute build/app/outputs/apk/release/app-release.aab --app ${{secrets.FIREBASE_APP_ID}} --token "${{secrets.FIREBASE_TOKEN}}" --release-notes "${{ github.event.pull_request.title }}" --groups "fastlane_demo_group"
+      #      - name: Create Firebase Service Credentials file
+      #        run: |
+      #          echo "FIREBASE_CREDENTIALS" > firebase_credentials.json.b64
+      #          base64 -d -i firebase_credentials.json.b64 > "${{ github.workspace }}/android/firebase_credentials.json"
+      #        env:
+      #          FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+
+      - name: Upload artifact to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          working-directory: ${{ github.workspace }}
+          appId: ${{secrets.FIREBASE_APP_ID}}
+          serviceCredentialsFileContent: ${{secrets.FIREBASE_CREDENTIALS}}
+          groups: fastlane_demo_group
+          release_notes: ${{ github.event.pull_request.title }}
+          file: build/app/outputs/apk/release/app-release.apk

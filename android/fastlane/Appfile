@@ -1,0 +1,2 @@
+json_key_file("/Users/duongnh/Downloads/fastlane-demo-aedf8-2da2c0a48257.json") # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
+package_name("com.example.fastlane_demo") # e.g. com.krausefx.app

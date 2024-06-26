@@ -1,0 +1,99 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+firebase_app_id = ENV['FIREBASE_APP_ID'] ||= '1:446835983825:ios:929949436e8354938b4cf0'
+key_store_base64 = ENV['KEY_STORE_BASE64']
+key_password = ENV['KEY_PASSWORD']
+store_password = ENV['STORE_PASSWORD']
+key_alias = ENV['KEY_ALIAS']
+key_alias = ENV['KEY_ALIAS']
+key_properties_path = './android/key.properties'
+key_store_path = '../android/fastlane_demo-keystore.jks'
+
+
+default_platform(:android)
+
+platform :android do
+
+
+    desc "Get , Upgrade flutter dependencies and Statically analyze the Dart code for any errors."
+    lane :flutter_refresh_dependencies do
+        sh('flutter pub get')
+        sh('flutter pub upgrade')
+        sh('flutter analyze .')
+    end
+
+    desc "Decode Keystore"
+    lane :decode_keystore do
+
+        sh('echo "#{key_store_base64}" > fastlane_demo-b64.txt')
+        sh('base64 -d fastlane_demo-b64.txt > #{key_store_path}')
+    end
+
+    desc "Set up key.properties"
+    lane :set_up_key_properties do
+
+        sh('echo keyPassword=\#{key_password} > #{key_properties_path}')
+        sh('echo storePassword=\#{store_password} >> #{key_properties_path}')
+        sh('echo keyAlias=\#{key_alias} >> #{key_properties_path}')
+        sh('echo storeFile=\#{key_store_path} >> #{key_properties_path}')
+    end
+
+    desc "Build apk"
+    lane :build_apk do |options|
+        usingFvm = options[:usingFvm]
+
+        if usingFvm == true
+            sh('fvm flutter build apk')
+        else
+            sh('flutter build apk')
+        end
+    end
+
+    desc "Deploy android"
+    lane :deployAndroid do
+
+#         credentials_file = ENV['FIREBASE_CREDENTIALS']
+        file_path ="../build/app/outputs/apk/release/app-release.apk"
+        release = firebase_app_distribution(
+            app: firebase_app_id,
+            testers: "fastlane_demo_group",
+            release_notes: "Lots of amazing new features to test out!",
+            android_artifact_type: "APK",
+            android_artifact_path: file_path
+#             service_credentials_file: credentials_file
+        )
+    end
+
+    lane:
+
+    desc "Firebase upload android using terminal"
+    lane :firebase_upload_android_local do
+        build_apk(
+          usingFvm: true,
+        )
+        deployAndroid
+    end
+
+    desc "Firebase upload android using pipeline"
+    lane :firebase_upload_android_pipeline do
+        flutter_refresh_dependencies
+        decode_keystore
+        set_up_key_properties
+        build_apk(
+          usingFvm: false,
+        )
+        deployAndroid
+    end
+end
