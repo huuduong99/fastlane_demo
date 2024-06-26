@@ -63,12 +63,12 @@ android {
 
     signingConfigs {
 
-        if (System.getenv("ANDROID_KEYSTORE_PATH")) {
+        if (System.getenv("KEY_STORE_PATH")) {
             release {
-                storeFile file(System.getenv("ANDROID_KEYSTORE_PATH"))
-                keyAlias System.getenv("ANDROID_KEYSTORE_ALIAS")
-                keyPassword System.getenv("ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD")
-                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                storeFile file(System.getenv("KEY_STORE_PATH"))
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD")
+                storePassword System.getenv("STORE_PASSWORD")
             }
         } else {
             release {
