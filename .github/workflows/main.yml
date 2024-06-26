@@ -76,12 +76,12 @@ jobs:
       #
       #      - name: Upload artifact to Firebase App Distribution
       #        run: firebase appdistribution:distribute build/app/outputs/apk/release/app-release.aab --app ${{secrets.FIREBASE_APP_ID}} --token "${{secrets.FIREBASE_TOKEN}}" --release-notes "${{ github.event.pull_request.title }}" --groups "fastlane_demo_group"
-      - name: Create Firebase Service Credentials file
-        run: |
-          echo "FIREBASE_CREDENTIALS" > firebase_credentials.json.b64
-          base64 -d -i firebase_credentials.json.b64 > "${{ github.workspace }}/android/firebase_credentials.json"
-        env:
-          FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+#      - name: Create Firebase Service Credentials file
+#        run: |
+#          echo "FIREBASE_CREDENTIALS" > firebase_credentials.json.b64
+#          base64 -d -i firebase_credentials.json.b64 > "${{ github.workspace }}/android/firebase_credentials.json"
+#        env:
+#          FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
 
       - name: Upload artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
