@@ -64,7 +64,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: apk-release
-          path: build/app/outputs/apk/release/app-release.aab
+          path: build/app/outputs/bundle/release/app-release.aab
 
       #      - name: Install npm
       #        uses: actions/setup-node@v3
@@ -91,4 +91,4 @@ jobs:
           serviceCredentialsFileContent: ${{secrets.FIREBASE_CREDENTIALS}}
           groups: fastlane_demo_group
           release_notes: ${{ github.event.pull_request.title }}
-          file: build/app/outputs/apk/release/app-release.aab
+          file: build/app/outputs/bundle/release/app-release.aab
