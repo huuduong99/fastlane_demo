@@ -17,9 +17,10 @@ key_store_base64 = ENV['KEY_STORE_BASE64']
 key_password = ENV['KEY_PASSWORD']
 store_password = ENV['STORE_PASSWORD']
 key_alias = ENV['KEY_ALIAS']
-key_alias = ENV['KEY_ALIAS']
-key_properties_path = './android/key.properties'
+firebase_credentials = ENV['FIREBASE_CREDENTIALS']
+key_properties_path = '../android/key.properties'
 key_store_path = '../android/fastlane_demo-keystore.jks'
+credentials_file = '../android/fastlane-demo-aedf8-2da2c0a48257.json'
 
 
 default_platform(:android)
@@ -50,6 +51,11 @@ platform :android do
         sh('echo storeFile=\#{key_store_path} >> #{key_properties_path}')
     end
 
+    desc "Create Firebase Service Credentials file"
+    lane :create_firebase_service_credentials_file do
+        sh('echo #{firebase_credentials} > #{credentials_file}')
+    end
+
     desc "Build apk"
     lane :build_apk do |options|
         usingFvm = options[:usingFvm]
@@ -64,19 +70,15 @@ platform :android do
     desc "Deploy android"
     lane :deployAndroid do
 
-#         credentials_file = ENV['FIREBASE_CREDENTIALS']
-        file_path ="../build/app/outputs/apk/release/app-release.apk"
         release = firebase_app_distribution(
             app: firebase_app_id,
             testers: "fastlane_demo_group",
             release_notes: "Lots of amazing new features to test out!",
             android_artifact_type: "APK",
-            android_artifact_path: file_path
-#             service_credentials_file: credentials_file
+            android_artifact_path: file_path,
+            service_credentials_file: credentials_file
         )
     end
-
-    lane:
 
     desc "Firebase upload android using terminal"
     lane :firebase_upload_android_local do
@@ -94,6 +96,7 @@ platform :android do
         build_apk(
           usingFvm: false,
         )
+        create_firebase_service_credentials_file
         deployAndroid
     end
 end

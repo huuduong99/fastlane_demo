@@ -41,3 +41,4 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/fastlane-demo-aedf8-2da2c0a48257.json
