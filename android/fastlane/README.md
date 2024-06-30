@@ -39,6 +39,14 @@ Decode Keystore
 
 Set up key.properties
 
+### android create_firebase_service_credentials_file
+
+```sh
+[bundle exec] fastlane android create_firebase_service_credentials_file
+```
+
+Create Firebase Service Credentials file
+
 ### android build_apk
 
 ```sh

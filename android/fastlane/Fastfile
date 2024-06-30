@@ -12,7 +12,7 @@
 
 # Uncomment the line if you want fastlane to automatically update itself
 # update_fastlane
-firebase_app_id = ENV['FIREBASE_APP_ID'] ||= '1:446835983825:ios:929949436e8354938b4cf0'
+firebase_app_id = ENV['FIREBASE_APP_ID'] ||= '1:446835983825:android:0a115acbef3d3b878b4cf0'
 key_store_base64 = ENV['KEY_STORE_BASE64']
 key_password = ENV['KEY_PASSWORD']
 store_password = ENV['STORE_PASSWORD']
@@ -69,7 +69,7 @@ platform :android do
 
     desc "Deploy android"
     lane :deployAndroid do
-
+        file_path ="../build/app/outputs/apk/release/app-release.apk"
         release = firebase_app_distribution(
             app: firebase_app_id,
             testers: "fastlane_demo_group",

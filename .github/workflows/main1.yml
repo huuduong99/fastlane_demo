@@ -1,4 +1,4 @@
-name: Test, Build and Release apk
+name: Test, Build and Release apk using github actions
 
 on:
   push:
